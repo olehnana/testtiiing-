@@ -1,0 +1,20 @@
+[Unit]
+Description=Шинковий Вісник — Bar Newspaper Web App
+After=network.target
+
+[Service]
+User=oleh
+Group=oleh
+WorkingDirectory=/home/oleh/bar
+Environment="PATH=/home/oleh/bar/venv/bin"
+Environment="SECRET_KEY=bar_production_key_rpi5_2026"
+Environment="ADMIN_PASSWORD=bar123"
+
+# Запуск Flask додатку через Gunicorn на порту 8000
+ExecStart=/home/oleh/bar/venv/bin/gunicorn --workers 3 --bind 0.0.0.0:8000 app:app
+
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

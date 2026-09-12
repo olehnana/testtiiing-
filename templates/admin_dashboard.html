@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="admin-panel-container">
+  
+  <div class="admin-header">
+    <div>
+      <h2 class="admin-title">Кабінет Редактора та Бармена</h2>
+      <p style="font-family: var(--font-headline); font-style: italic; color: var(--ink-muted);">Швидке перемикання наявності напоїв та редагування прейскуранту</p>
+    </div>
+    
+    <div class="admin-actions">
+      <button type="button" class="btn-antique" id="btn-add-drink">+ Додати напій</button>
+      <a href="{{ url_for('index') }}" class="btn-antique" target="_blank">👁 Переглянути газету</a>
+      <a href="{{ url_for('admin_logout') }}" class="btn-antique btn-antique-danger">Вийти</a>
+    </div>
+  </div>
+
+  <!-- Announcement & Bar Settings Form -->
+  <details style="margin-bottom: 24px; background: var(--bg-paper-dark); border: 1px solid var(--border-sepia); padding: 14px 18px;">
+    <summary style="font-family: var(--font-headline); font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 1rem;">
+      ⚙ Налаштування закладу та термінових оголошень (Натисніть для редагування)
+    </summary>
+    
+    <form method="POST" action="{{ url_for('admin_update_settings') }}" style="margin-top: 16px;">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="bar_name">Назва видання / бару:</label>
+          <input type="text" id="bar_name" name="bar_name" class="form-control" value="{{ settings.bar_name }}">
+        </div>
+        <div class="form-group">
+          <label for="bar_tagline">Підзаголовок:</label>
+          <input type="text" id="bar_tagline" name="bar_tagline" class="form-control" value="{{ settings.bar_tagline }}">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="announcement">Текст екстреного оголошення (показується на першій шпальті):</label>
+        <input type="text" id="announcement" name="announcement" class="form-control" value="{{ settings.announcement }}">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="bar_hours">Години роботи:</label>
+          <input type="text" id="bar_hours" name="bar_hours" class="form-control" value="{{ settings.bar_hours }}">
+        </div>
+        <div class="form-group">
+          <label for="bar_address">Адреса та орієнтир:</label>
+          <input type="text" id="bar_address" name="bar_address" class="form-control" value="{{ settings.bar_address }}">
+        </div>
+      </div>
+
+      <button type="submit" class="btn-antique" style="margin-top: 8px;">Зберегти налаштування газети</button>
+    </form>
+  </details>
+
+  <!-- Drinks Table -->
+  <h3 style="font-family: var(--font-headline); text-transform: uppercase; margin-bottom: 12px; font-size: 1.25rem;">
+    Каталог напоїв (Натискайте на кнопку для миттєвої зміни наявності):
+  </h3>
+
+  <div style="overflow-x: auto;">
+    <table class="admin-table" id="admin-drinks-table">
+      <thead>
+        <tr>
+          <th style="width: 50px;">Фото</th>
+          <th>Назва та Категорія</th>
+          <th>Характеристики</th>
+          <th style="text-align: center; width: 220px;">Наявність (в 1 клік)</th>
+          <th style="text-align: right; width: 160px;">Дії</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for drink in drinks %}
+        <tr id="drink-row-{{ drink.id }}">
+          <td>
+            <img src="{{ drink.image_path }}" alt="{{ drink.name }}" class="admin-thumb">
+          </td>
+          <td>
+            <strong style="font-size: 1.05rem; font-family: var(--font-headline);">{{ drink.name }}</strong>
+            <div style="font-size: 0.8rem; font-family: var(--font-mono); color: var(--ink-muted);">
+              {{ drink.category }} • Порядок: {{ drink.sort_order }}
+            </div>
+            <div style="font-size: 0.85rem; color: var(--ink-dark); margin-top: 4px;">
+              {{ drink.description|truncate(70) }}
+            </div>
+          </td>
+          <td style="font-family: var(--font-mono); font-size: 0.85rem;">
+            {% if drink.volume %}{{ drink.volume }}<br>{% endif %}
+            {% if drink.strength %}{{ drink.strength }}{% endif %}
+          </td>
+          <td style="text-align: center;">
+            <button type="button"
+                    class="toggle-stock-btn {% if drink.is_available %}in-stock{% else %}out-stock{% endif %}"
+                    data-action="toggle"
+                    data-id="{{ drink.id }}"
+                    title="Натисніть для перемикання статусу">
+              {% if drink.is_available %}
+                ✓ Є В НАЯВНОСТІ
+              {% else %}
+                ✕ РОЗПРОДАНО
+              {% endif %}
+            </button>
+          </td>
+          <td style="text-align: right;">
+            <button type="button" class="btn-antique" style="padding: 4px 8px; font-size: 0.8rem;"
+                    data-action="edit"
+                    data-id="{{ drink.id }}">
+              ✎ Змінити
+            </button>
+            <button type="button" class="btn-antique btn-antique-danger" style="padding: 4px 8px; font-size: 0.8rem;"
+                    data-action="delete"
+                    data-id="{{ drink.id }}"
+                    data-name="{{ drink.name }}">
+              🗑
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Modal for Adding / Editing Drink -->
+<div id="drinkModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
+  <div style="background: var(--bg-paper); border: 2px solid var(--ink-black); max-width: 650px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); position: relative;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--ink-black); padding-bottom: 12px; margin-bottom: 20px;">
+      <h3 id="modalTitle" style="font-family: var(--font-masthead); font-size: 1.3rem; text-transform: uppercase; margin: 0;">Редагувати напій</h3>
+      <button type="button" id="btn-close-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">✕</button>
+    </div>
+
+    <form id="drinkForm">
+      <input type="hidden" id="form-id" name="id">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="form-name">Назва напою (укр):</label>
+          <input type="text" id="form-name" name="name" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="form-category">Категорія:</label>
+          <input type="text" id="form-category" name="category" class="form-control" placeholder="Коктейлі, Міцні напої..." required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="form-strength">Міцність:</label>
+          <input type="text" id="form-strength" name="strength" class="form-control" placeholder="напр. 15% об.">
+        </div>
+        <div class="form-group">
+          <label for="form-volume">Об'єм подачі:</label>
+          <input type="text" id="form-volume" name="volume" class="form-control" placeholder="напр. 200 мл">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="form-ingredients">Інгредієнти / Склад:</label>
+        <input type="text" id="form-ingredients" name="ingredients" class="form-control" placeholder="Ром, лайм, м'ята, цукор...">
+      </div>
+
+      <div class="form-group">
+        <label for="form-description">Художній опис / смаковий профіль:</label>
+        <textarea id="form-description" name="description" class="form-control" rows="3" required></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="form-image">Шлях до зображення або URL:</label>
+          <input type="text" id="form-image" name="image_path" class="form-control" placeholder="/static/images/drinks/... або https://...">
+        </div>
+        <div class="form-group">
+          <label for="form-sort">Порядок сортування:</label>
+          <input type="number" id="form-sort" name="sort_order" class="form-control" value="0">
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top: 12px;">
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          <input type="checkbox" id="form-available" name="is_available" value="1" style="width: 20px; height: 20px;">
+          <span>Позиція є в наявності для замовлення</span>
+        </label>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; border-top: 1px solid var(--border-sepia); padding-top: 16px;">
+        <button type="button" class="btn-antique" id="btn-cancel-modal" style="background: transparent;">Скасувати</button>
+        <button type="submit" class="btn-antique">Зберегти зміни</button>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+<!-- Drinks JSON data block without inline attribute scripting -->
+<script id="drinks-data" type="application/json">
+{{ drinks|tojson|safe }}
+</script>
+
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

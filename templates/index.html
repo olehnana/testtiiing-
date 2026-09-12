@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+  <!-- Filter & Search Controls Bar -->
+  <nav class="newspaper-nav" style="margin-top: 0; margin-bottom: 20px;" aria-label="Категорії меню">
+    <div class="category-filters">
+      <button class="filter-btn active" data-filter="all">Всі</button>
+      {% for cat in categories %}
+      <button class="filter-btn" data-filter="{{ cat }}">{{ cat }}</button>
+      {% endfor %}
+      <button class="filter-btn" data-filter="available">✓ В наявності</button>
+    </div>
+
+    <div class="search-box-wrap">
+      <input type="text" id="search-input" class="search-input" placeholder="🔍 Пошук напою або складу..." aria-label="Пошук у меню">
+    </div>
+  </nav>
+
+  <!-- Drinks Menu Grid -->
+  <div class="drinks-grid" id="drinks-container">
+    {% for drink in drinks %}
+    <article class="drink-card {% if not drink.is_available %}out-of-stock{% endif %}"
+             data-category="{{ drink.category }}"
+             data-available="{{ drink.is_available }}"
+             data-name="{{ drink.name }}"
+             data-ingredients="{{ drink.ingredients }}"
+             data-desc="{{ drink.description }}">
+      
+      <!-- Photo frame -->
+      <div class="drink-photo-frame">
+        <img src="{{ drink.image_path }}" alt="{{ drink.name }}" loading="lazy">
+      </div>
+
+      <!-- Specs: Category, Volume & Strength -->
+      <div class="drink-meta-strip">
+        <span class="drink-category-tag">{{ drink.category }}</span>
+        <span class="drink-specs">
+          {% if drink.volume %}{{ drink.volume }}{% endif %}
+          {% if drink.volume and drink.strength %} • {% endif %}
+          {% if drink.strength %}{{ drink.strength }}{% endif %}
+        </span>
+      </div>
+
+      <!-- Drink Title -->
+      <h3 class="drink-title">{{ drink.name }}</h3>
+
+      <!-- Ingredients if present -->
+      {% if drink.ingredients %}
+      <div class="drink-ingredients">
+        {{ drink.ingredients }}
+      </div>
+      {% endif %}
+
+      <!-- Description -->
+      <p class="drink-description">{{ drink.description }}</p>
+
+      <!-- Availability Stamp (No prices!) -->
+      <div class="card-footer-stamp">
+        {% if drink.is_available %}
+          <span class="stamp stamp-available">В наявності</span>
+        {% else %}
+          <span class="stamp stamp-sold-out">Тимчасово розпродано</span>
+        {% endif %}
+      </div>
+
+    </article>
+    {% endfor %}
+  </div>
+
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/newspaper.js') }}"></script>
+{% endblock %}

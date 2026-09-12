@@ -1,0 +1,768 @@
+/* =========================================================
+   ШИНКОВИЙ ВІСНИКЪ — Newspaper Style Design System
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,400;1,700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap');
+
+:root {
+  --bg-paper: #f6f1e5;
+  --bg-paper-dark: #eee6d3;
+  --bg-paper-light: #fbf8f0;
+  --ink-black: #1a1714;
+  --ink-dark: #2d2926;
+  --ink-muted: #5c554e;
+  --ink-faint: #8c8278;
+  --border-sepia: #3c342b;
+  --border-light: #d6cbb8;
+  
+  --stamp-red: #9e2a2b;
+  --stamp-green: #2b5836;
+  --stamp-gold: #8c6d36;
+  
+  --font-masthead: 'Cinzel', 'Playfair Display', Georgia, serif;
+  --font-headline: 'Playfair Display', 'Old Standard TT', Georgia, serif;
+  --font-body: 'Spectral', 'Georgia', serif;
+  --font-mono: 'Courier New', Courier, monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #2b2622;
+  background-image: 
+    radial-gradient(#1f1b18 15%, transparent 16%),
+    radial-gradient(#1f1b18 15%, transparent 16%);
+  background-size: 60px 60px;
+  background-position: 0 0, 30px 30px;
+  color: var(--ink-black);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  padding: 24px 12px;
+  min-height: 100vh;
+}
+
+/* Container for newspaper broadsheet */
+.newspaper-wrapper {
+  max-width: 1280px;
+  margin: 0 auto;
+  background-color: var(--bg-paper);
+  background-image: linear-gradient(to right, rgba(0,0,0,0.02) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(0,0,0,0.02) 1px, transparent 1px);
+  background-size: 20px 20px;
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.4),
+    0 0 100px rgba(0, 0, 0, 0.2),
+    inset 0 0 80px rgba(110, 80, 40, 0.08);
+  border: 1px solid #c9bda7;
+  padding: 24px 36px 48px;
+  position: relative;
+}
+
+/* Aged paper vignette overlay */
+.newspaper-wrapper::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 60px rgba(60, 40, 10, 0.08);
+}
+
+/* ================= HEADER & MASTHEAD ================= */
+
+.top-bar-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-top: 1px solid var(--border-sepia);
+  border-bottom: 1px solid var(--border-sepia);
+  padding: 6px 10px;
+  margin-bottom: 16px;
+  color: var(--ink-dark);
+}
+
+.masthead {
+  text-align: center;
+  padding: 10px 0 20px;
+  position: relative;
+}
+
+.masthead-ornament {
+  font-size: 1.4rem;
+  color: var(--ink-muted);
+  margin-bottom: 4px;
+}
+
+.masthead-title {
+  font-family: var(--font-masthead);
+  font-size: clamp(2.5rem, 6.5vw, 4.8rem);
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink-black);
+  line-height: 1.05;
+  margin: 0;
+  text-shadow: 1px 1px 0px rgba(0,0,0,0.15);
+}
+
+.masthead-tagline {
+  font-family: var(--font-headline);
+  font-size: 1.15rem;
+  font-style: italic;
+  letter-spacing: 1px;
+  color: var(--ink-muted);
+  margin-top: 8px;
+}
+
+/* Double newspaper rules */
+.double-divider {
+  border: none;
+  border-top: 3px double var(--border-sepia);
+  margin: 12px 0 20px;
+}
+
+.thick-divider {
+  border: none;
+  border-top: 4px solid var(--ink-black);
+  margin: 16px 0 24px;
+}
+
+.hairline-divider {
+  border: none;
+  border-top: 1px solid var(--border-light);
+  margin: 14px 0;
+}
+
+/* ================= BREAKING ANNOUNCEMENT ================= */
+
+.emergency-banner {
+  background-color: var(--bg-paper-dark);
+  border: 2px dashed var(--border-sepia);
+  padding: 12px 18px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.emergency-tag {
+  background-color: var(--ink-black);
+  color: var(--bg-paper-light);
+  font-family: var(--font-mono);
+  font-weight: bold;
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  white-space: nowrap;
+}
+
+.emergency-text {
+  font-family: var(--font-headline);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink-dark);
+  margin: 0;
+}
+
+/* ================= NAVIGATION & FILTER CONTROLS ================= */
+
+.newspaper-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  border-top: 2px solid var(--ink-black);
+  border-bottom: 2px solid var(--ink-black);
+  padding: 12px 0;
+  margin-bottom: 28px;
+  background-color: rgba(238, 230, 211, 0.4);
+}
+
+.category-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filter-btn {
+  background: transparent;
+  border: 1px solid var(--border-sepia);
+  padding: 6px 14px;
+  font-family: var(--font-headline);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink-dark);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  background-color: var(--bg-paper-dark);
+}
+
+.filter-btn.active {
+  background-color: var(--ink-black);
+  color: var(--bg-paper-light);
+  border-color: var(--ink-black);
+}
+
+.search-box-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  background: var(--bg-paper-light);
+  border: 1px solid var(--border-sepia);
+  padding: 7px 14px;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--ink-black);
+  outline: none;
+  min-width: 240px;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  border-color: var(--ink-black);
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+
+/* Availability summary banner */
+.stock-summary {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+  text-align: right;
+  margin-bottom: 20px;
+}
+
+/* ================= EDITORIAL FRONT PAGE INTRO ================= */
+
+.frontpage-intro {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 24px;
+  padding-bottom: 24px;
+  margin-bottom: 30px;
+  border-bottom: 1px solid var(--border-sepia);
+}
+
+.intro-column {
+  font-size: 0.95rem;
+  text-align: justify;
+}
+
+.intro-column h3 {
+  font-family: var(--font-headline);
+  font-size: 1.25rem;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--ink-black);
+  padding-bottom: 4px;
+  margin-bottom: 10px;
+}
+
+.center-headline {
+  text-align: center;
+}
+
+.center-headline h2 {
+  font-family: var(--font-headline);
+  font-size: 2rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+
+.quote-box {
+  background-color: var(--bg-paper-dark);
+  border-left: 3px solid var(--ink-black);
+  padding: 12px 16px;
+  font-style: italic;
+  font-family: var(--font-headline);
+  margin: 12px 0;
+}
+
+/* Drop-cap for lead paragraph */
+.drop-cap::first-letter {
+  font-family: var(--font-headline);
+  float: left;
+  font-size: 3.6rem;
+  line-height: 0.85;
+  padding-top: 4px;
+  padding-right: 8px;
+  padding-bottom: 2px;
+  font-weight: 700;
+  color: var(--ink-black);
+}
+
+/* ================= DRINKS BROADSHEET GRID ================= */
+
+.drinks-section-title {
+  text-align: center;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.drinks-section-title h2 {
+  display: inline-block;
+  background: var(--bg-paper);
+  padding: 0 20px;
+  font-family: var(--font-masthead);
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  position: relative;
+  z-index: 2;
+}
+
+.drinks-section-title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 1px solid var(--border-sepia);
+  z-index: 1;
+}
+
+.drinks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 28px;
+}
+
+/* Single Drink Article Card */
+.drink-card {
+  background-color: var(--bg-paper-light);
+  border: 1px solid var(--border-sepia);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.drink-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 4px 6px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Out of stock greyed styling */
+.drink-card.out-of-stock {
+  opacity: 0.72;
+  filter: grayscale(25%);
+  background-color: #ede6d8;
+}
+
+/* Drink photo engraving frame */
+.drink-photo-frame {
+  position: relative;
+  width: 100%;
+  height: 230px;
+  overflow: hidden;
+  border: 1px solid var(--border-sepia);
+  padding: 4px;
+  background: #ffffff;
+  margin-bottom: 14px;
+}
+
+.drink-photo-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: contrast(105%) saturate(95%);
+  transition: transform 0.4s ease;
+}
+
+.drink-card:hover .drink-photo-frame img {
+  transform: scale(1.04);
+}
+
+/* Category & Specs sub-bar */
+.drink-meta-strip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px dashed var(--border-light);
+  padding-bottom: 6px;
+  margin-bottom: 10px;
+}
+
+.drink-category-tag {
+  font-weight: bold;
+  color: var(--ink-dark);
+}
+
+.drink-specs {
+  background: var(--bg-paper-dark);
+  padding: 2px 6px;
+  border: 1px solid var(--border-light);
+  font-weight: 600;
+}
+
+/* Article headline */
+.drink-title {
+  font-family: var(--font-headline);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ink-black);
+  margin-bottom: 8px;
+}
+
+/* Ingredients list */
+.drink-ingredients {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--ink-muted);
+  margin-bottom: 10px;
+  line-height: 1.4;
+  border-left: 2px solid var(--border-light);
+  padding-left: 8px;
+}
+
+/* Story/description text */
+.drink-description {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--ink-dark);
+  margin-bottom: 16px;
+  flex-grow: 1;
+}
+
+/* ================= STAMPS ================= */
+
+.card-footer-stamp {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-light);
+}
+
+.stamp {
+  font-family: var(--font-headline);
+  font-size: 0.85rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding: 4px 10px;
+  border: 2px solid currentColor;
+  display: inline-block;
+  border-radius: 2px;
+  user-select: none;
+}
+
+.stamp-available {
+  color: var(--stamp-green);
+  border: 2px dashed var(--stamp-green);
+  background-color: rgba(43, 88, 54, 0.05);
+}
+
+.stamp-sold-out {
+  color: var(--stamp-red);
+  border: 2px solid var(--stamp-red);
+  background-color: rgba(158, 42, 43, 0.08);
+  transform: rotate(-3deg);
+  box-shadow: 1px 1px 0px rgba(0,0,0,0.1);
+}
+
+.vintage-number {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+}
+
+/* ================= FOOTER ================= */
+
+.newspaper-footer {
+  margin-top: 48px;
+  border-top: 4px double var(--ink-black);
+  padding-top: 24px;
+}
+
+.footer-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 28px;
+  font-size: 0.9rem;
+}
+
+.footer-col h4 {
+  font-family: var(--font-headline);
+  font-size: 1.05rem;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border-sepia);
+  padding-bottom: 4px;
+  margin-bottom: 10px;
+}
+
+.footer-bottom-bar {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+  margin-top: 24px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-link {
+  color: var(--ink-muted);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--ink-muted);
+  padding-bottom: 1px;
+}
+
+.admin-link:hover {
+  color: var(--ink-black);
+  border-bottom-color: var(--ink-black);
+}
+
+/* ================= ADMIN INTERFACE ================= */
+
+.admin-panel-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: var(--bg-paper);
+  border: 2px solid var(--ink-black);
+  padding: 30px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 3px double var(--ink-black);
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+
+.admin-title {
+  font-family: var(--font-masthead);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-antique {
+  background: var(--bg-paper-light);
+  border: 2px solid var(--ink-black);
+  padding: 8px 16px;
+  font-family: var(--font-headline);
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--ink-black);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.btn-antique:hover {
+  background: var(--ink-black);
+  color: var(--bg-paper-light);
+}
+
+.btn-antique-danger {
+  border-color: var(--stamp-red);
+  color: var(--stamp-red);
+}
+
+.btn-antique-danger:hover {
+  background: var(--stamp-red);
+  color: #fff;
+}
+
+/* Admin Table */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 30px;
+}
+
+.admin-table th, .admin-table td {
+  border: 1px solid var(--border-sepia);
+  padding: 12px;
+  text-align: left;
+}
+
+.admin-table th {
+  background: var(--bg-paper-dark);
+  font-family: var(--font-headline);
+  font-size: 0.95rem;
+  text-transform: uppercase;
+}
+
+.admin-thumb {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border: 1px solid var(--border-sepia);
+}
+
+/* Large Instant Toggle Button */
+.toggle-stock-btn {
+  padding: 8px 16px;
+  font-family: var(--font-headline);
+  font-weight: 900;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 4px;
+  border: 2px solid;
+  transition: all 0.2s ease;
+  min-width: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.toggle-stock-btn.in-stock {
+  background-color: #e8f5e9;
+  border-color: var(--stamp-green);
+  color: var(--stamp-green);
+}
+
+.toggle-stock-btn.in-stock:hover {
+  background-color: #c8e6c9;
+}
+
+.toggle-stock-btn.out-stock {
+  background-color: #ffebee;
+  border-color: var(--stamp-red);
+  color: var(--stamp-red);
+}
+
+.toggle-stock-btn.out-stock:hover {
+  background-color: #ffcdd2;
+}
+
+/* Form Styling */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-family: var(--font-headline);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-sepia);
+  background: var(--bg-paper-light);
+  font-family: var(--font-body);
+  font-size: 1rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Toast notification */
+.toast-msg {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--ink-black);
+  color: var(--bg-paper-light);
+  padding: 12px 24px;
+  border: 2px solid var(--border-sepia);
+  font-family: var(--font-headline);
+  font-size: 1.05rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+}
+
+.toast-msg.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ================= RESPONSIVE DESIGN ================= */
+
+@media (max-width: 900px) {
+  .frontpage-intro {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  
+  .footer-columns {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+}
+
+@media (max-width: 600px) {
+  .newspaper-wrapper {
+    padding: 16px 14px 28px;
+  }
+  
+  .masthead-title {
+    font-size: 2.2rem;
+  }
+  
+  .top-bar-meta {
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+  }
+  
+  .drinks-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .newspaper-nav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-input {
+    width: 100%;
+  }
+}
