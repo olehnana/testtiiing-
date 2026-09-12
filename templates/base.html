@@ -10,7 +10,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20y=%220%22%20width=%22100%22%20height=%22100%22><text y=%22.9em%22 font-size=%2290%22>🍸</text></svg>">
   
   <!-- CSS Stylesheet -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/newspaper.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/newspaper.css') }}?v={{ cache_bust }}">
   {% block extra_head %}{% endblock %}
 </head>
 <body>

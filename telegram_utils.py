@@ -62,6 +62,12 @@ def format_order_message(order):
     if order.get('comment'):
         lines.append(f"💬 <b>Побажання:</b> <i>{order.get('comment')}</i>")
         
+    if order.get('payment_method'):
+        lines.append(f"💳 <b>Оплата:</b> {order.get('payment_method')}")
+        
+    if order.get('promocode'):
+        lines.append(f"🎁 <b>Промокод:</b> <code>{order.get('promocode')}</code> (Знижка -100% — За рахунок закладу)")
+
     lines.append("────────────────────")
     lines.append("⏰ <i>Замовлення зафіксовано в системі</i>")
     

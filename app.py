@@ -53,7 +53,8 @@ def inject_global_vars():
         'settings': settings,
         'ua_date': get_current_ua_date(),
         'is_admin': session.get('is_admin', False),
-        'is_local': is_local_request()
+        'is_local': is_local_request(),
+        'cache_bust': int(datetime.datetime.now().timestamp())
     }
 
 # Ensure DB is created on app launch
@@ -105,12 +106,18 @@ def api_order():
     if not drink_name or not table_number:
         return jsonify({'success': False, 'error': "Оберіть напій та вкажіть номер столика / місце"}), 400
         
+    payment_method = data.get('payment_method', 'Готівка').strip()
+    promocode = data.get('promocode', '').strip()
+    
+    if promocode.upper() == 'РОДИНА':
+        payment_method = 'Промокод РОДИНА (-100% Безкоштовно)'
+        
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
-    INSERT INTO orders (drink_name, table_number, quantity, comment, guest_name)
-    VALUES (?, ?, ?, ?, ?)
-    """, (drink_name, table_number, quantity, comment, guest_name))
+    INSERT INTO orders (drink_name, table_number, quantity, comment, guest_name, payment_method, promocode)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (drink_name, table_number, quantity, comment, guest_name, payment_method, promocode))
     order_id = cursor.lastrowid
     conn.commit()
     
@@ -129,7 +136,9 @@ def api_order():
             'table_number': table_number,
             'quantity': quantity,
             'comment': comment,
-            'guest_name': guest_name
+            'guest_name': guest_name,
+            'payment_method': payment_method,
+            'promocode': promocode
         }
         msg = format_order_message(order_obj)
         send_telegram_message(tg_token, tg_chat, msg)

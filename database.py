@@ -170,10 +170,22 @@ def init_db():
         quantity INTEGER DEFAULT 1,
         comment TEXT,
         guest_name TEXT,
+        payment_method TEXT DEFAULT 'Готівка',
+        promocode TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         status TEXT DEFAULT 'new'
     )
     """)
+    
+    # Safe column additions if table already existed
+    try:
+        cursor.execute("ALTER TABLE orders ADD COLUMN payment_method TEXT DEFAULT 'Готівка'")
+    except Exception:
+        pass
+    try:
+        cursor.execute("ALTER TABLE orders ADD COLUMN promocode TEXT")
+    except Exception:
+        pass
     
     # Settings table
     cursor.execute("""

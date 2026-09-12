@@ -59,14 +59,86 @@ document.addEventListener('DOMContentLoaded', function () {
   const btnCloseOrder = document.getElementById('btn-close-order');
   const btnCancelOrder = document.getElementById('btn-cancel-order');
   const btnSubmitOrder = document.getElementById('btn-submit-order');
+  const monobankBox = document.getElementById('monobank-info-box');
+  const promoInput = document.getElementById('order-promocode');
+  const btnApplyPromo = document.getElementById('btn-apply-promo');
+  const promoStatus = document.getElementById('promo-status-msg');
+
+  function updatePaymentVisibility() {
+    const selectedMethod = document.querySelector('input[name="payment_method_choice"]:checked');
+    if (monobankBox) {
+      if (selectedMethod && selectedMethod.value === 'Картка (Монобанка)') {
+        monobankBox.style.display = 'block';
+      } else {
+        monobankBox.style.display = 'none';
+      }
+    }
+  }
+
+  function checkPromoCode() {
+    if (!promoInput || !promoStatus) return;
+    const code = promoInput.value.trim().toUpperCase();
+    if (code === 'РОДИНА') {
+      promoStatus.style.display = 'block';
+      promoStatus.style.backgroundColor = '#e8f5e9';
+      promoStatus.style.border = '1px solid #4caf50';
+      promoStatus.style.color = '#1b5e20';
+      promoStatus.innerHTML = '🎉 Промокод <b>РОДИНА</b> активовано! Знижка <b>-100%</b> (За рахунок закладу) 🎁';
+    } else if (code.length > 0) {
+      promoStatus.style.display = 'block';
+      promoStatus.style.backgroundColor = '#ffebee';
+      promoStatus.style.border = '1px solid #ef5350';
+      promoStatus.style.color = '#c62828';
+      promoStatus.textContent = '❌ Невірний або недійсний промокод';
+    } else {
+      promoStatus.style.display = 'none';
+      promoStatus.innerHTML = '';
+    }
+  }
+
+  // Radio button listeners for payment
+  const paymentRadios = document.querySelectorAll('input[name="payment_method_choice"]');
+  paymentRadios.forEach(radio => {
+    radio.addEventListener('change', updatePaymentVisibility);
+  });
+
+  if (btnApplyPromo) {
+    btnApplyPromo.addEventListener('click', checkPromoCode);
+  }
+  if (promoInput) {
+    promoInput.addEventListener('input', function () {
+      if (promoInput.value.trim().toUpperCase() === 'РОДИНА') {
+        checkPromoCode();
+      }
+    });
+    promoInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        checkPromoCode();
+      }
+    });
+  }
 
   function openOrderModal(drinkName, volume) {
     if (!orderModal) return;
-    orderDrinkName.value = drinkName;
-    orderDrinkDisplay.textContent = volume ? `${drinkName} (${volume})` : drinkName;
-    orderForm.reset();
-    orderDrinkName.value = drinkName;
-    document.getElementById('order-qty').value = 1;
+    if (orderDrinkName) orderDrinkName.value = drinkName;
+    if (orderDrinkDisplay) orderDrinkDisplay.textContent = volume ? `${drinkName} (${volume})` : drinkName;
+    if (orderForm) orderForm.reset();
+    if (orderDrinkName) orderDrinkName.value = drinkName;
+    
+    const qtyInput = document.getElementById('order-qty');
+    if (qtyInput) qtyInput.value = 1;
+    
+    // Default radio
+    const cashRadio = document.querySelector('input[name="payment_method_choice"][value="Готівка"]');
+    if (cashRadio) cashRadio.checked = true;
+    updatePaymentVisibility();
+
+    if (promoStatus) {
+      promoStatus.style.display = 'none';
+      promoStatus.innerHTML = '';
+    }
+
     orderModal.style.display = 'flex';
   }
 
@@ -75,6 +147,10 @@ document.addEventListener('DOMContentLoaded', function () {
       orderModal.style.display = 'none';
     }
   }
+
+  // Expose globally
+  window.openOrderModal = openOrderModal;
+  window.closeOrderModal = closeOrderModal;
 
   document.addEventListener('click', function (e) {
     const trigger = e.target.closest('.btn-order-trigger');
@@ -95,12 +171,25 @@ document.addEventListener('DOMContentLoaded', function () {
       const originalText = btnSubmitOrder.textContent;
       btnSubmitOrder.textContent = 'Відправляємо...';
 
+      let chosenPayment = 'Готівка';
+      const selectedRadio = document.querySelector('input[name="payment_method_choice"]:checked');
+      if (selectedRadio) {
+        chosenPayment = selectedRadio.value;
+      }
+
+      const promocodeVal = (promoInput ? promoInput.value.trim() : '');
+      if (promocodeVal.toUpperCase() === 'РОДИНА') {
+        chosenPayment = 'Промокод РОДИНА (-100% Безкоштовно)';
+      }
+
       const payload = {
         drink_name: orderDrinkName.value,
         table_number: document.getElementById('order-table').value.trim(),
         quantity: parseInt(document.getElementById('order-qty').value, 10) || 1,
         guest_name: document.getElementById('order-guest').value.trim(),
-        comment: document.getElementById('order-comment').value.trim()
+        comment: document.getElementById('order-comment').value.trim(),
+        payment_method: chosenPayment,
+        promocode: promocodeVal
       };
 
       try {

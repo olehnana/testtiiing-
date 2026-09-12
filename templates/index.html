@@ -62,6 +62,7 @@
           <button type="button" class="btn-antique btn-order-trigger" 
                   data-name="{{ drink.name }}" 
                   data-volume="{{ drink.volume }}"
+                  onclick="openOrderModal('{{ drink.name }}', '{{ drink.volume }}')"
                   style="padding: 5px 12px; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
             🛎 Замовити
           </button>
@@ -75,56 +76,136 @@
   </div>
 
   <!-- Order Modal Dialog -->
-  <div id="orderModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); z-index: 10000; align-items: center; justify-content: center; padding: 16px;">
-    <div style="background: var(--bg-paper); border: 2px solid var(--ink-black); max-width: 460px; width: 100%; padding: 26px; box-shadow: 0 10px 35px rgba(0,0,0,0.4); position: relative;">
+  <div id="orderModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center; padding: 16px; overflow-y: auto;">
+    <div style="background: var(--bg-paper); border: 2px solid var(--ink-black); max-width: 480px; width: 100%; padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.45); position: relative; margin: auto;">
       
       <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--ink-black); padding-bottom: 10px; margin-bottom: 16px;">
-        <h3 style="font-family: var(--font-masthead); font-size: 1.25rem; text-transform: uppercase; margin: 0;">
+        <h3 style="font-family: var(--font-masthead); font-size: 1.25rem; text-transform: uppercase; margin: 0; display: flex; align-items: center; gap: 8px;">
           🛎 Швидке замовлення
         </h3>
-        <button type="button" id="btn-close-order" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">✕</button>
+        <button type="button" id="btn-close-order" onclick="closeOrderModal()" style="background: none; border: none; font-size: 1.6rem; cursor: pointer; line-height: 1; padding: 0 4px;">✕</button>
       </div>
 
       <form id="orderForm">
         <input type="hidden" id="order-drink-name" name="drink_name">
 
+        <!-- Selected Drink Display -->
         <div style="margin-bottom: 14px;">
-          <label style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 4px;">Обраний напій:</label>
+          <label style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 4px; font-size: 0.9rem;">Обраний напій:</label>
           <div id="order-drink-display" style="font-family: var(--font-headline); font-size: 1.15rem; font-weight: bold; color: var(--ink-dark); background: var(--bg-paper-light); padding: 8px 12px; border: 1px solid var(--border-sepia);"></div>
         </div>
 
-        <div class="form-row" style="margin-bottom: 14px;">
-          <div class="form-group" style="margin-bottom: 0;">
-            <label for="order-table" style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 4px;">Номер столика / Бар *:</label>
-            <input type="text" id="order-table" name="table_number" class="form-control" placeholder="Стіл 3 чи Бар" required>
+        <!-- Table and Quantity Row -->
+        <div class="form-row" style="margin-bottom: 14px; display: flex; gap: 12px;">
+          <div class="form-group" style="flex: 2; margin-bottom: 0;">
+            <label for="order-table" style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 4px; font-size: 0.9rem;">Номер столика / Бар *:</label>
+            <input type="text" id="order-table" name="table_number" class="form-control" placeholder="напр. Стіл 3 чи Бар" required style="width: 100%; padding: 7px 10px; font-family: var(--font-body); border: 1px solid var(--border-sepia); background: var(--bg-paper-light);">
           </div>
-          <div class="form-group" style="margin-bottom: 0;">
-            <label for="order-qty" style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 4px;">Кількість:</label>
-            <input type="number" id="order-qty" name="quantity" class="form-control" value="1" min="1" max="20" required>
+          <div class="form-group" style="flex: 1; margin-bottom: 0;">
+            <label for="order-qty" style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 4px; font-size: 0.9rem;">Кількість:</label>
+            <input type="number" id="order-qty" name="quantity" class="form-control" value="1" min="1" max="20" required style="width: 100%; padding: 7px 10px; font-family: var(--font-body); border: 1px solid var(--border-sepia); background: var(--bg-paper-light); text-align: center;">
           </div>
         </div>
 
+        <!-- Guest Name -->
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label for="order-guest" style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 4px; font-size: 0.9rem;">Ваше ім'я (за бажанням):</label>
+          <input type="text" id="order-guest" name="guest_name" class="form-control" placeholder="Як до вас звертатися?" style="width: 100%; padding: 7px 10px; font-family: var(--font-body); border: 1px solid var(--border-sepia); background: var(--bg-paper-light);">
+        </div>
+
+        <!-- Payment Method Selection -->
         <div class="form-group" style="margin-bottom: 14px;">
-          <label for="order-guest" style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 4px;">Ваше ім'я (за бажанням):</label>
-          <input type="text" id="order-guest" name="guest_name" class="form-control" placeholder="Як до вас звертатися?">
+          <label style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 6px; font-size: 0.9rem;">Спосіб оплати *:</label>
+          <div style="display: flex; gap: 10px;">
+            <label style="flex: 1; display: flex; align-items: center; gap: 6px; background: var(--bg-paper-light); border: 1px solid var(--border-sepia); padding: 8px 10px; cursor: pointer; font-size: 0.92rem;">
+              <input type="radio" name="payment_method_choice" value="Готівка" checked style="cursor: pointer;">
+              <span>💵 Готівка</span>
+            </label>
+            <label style="flex: 1; display: flex; align-items: center; gap: 6px; background: var(--bg-paper-light); border: 1px solid var(--border-sepia); padding: 8px 10px; cursor: pointer; font-size: 0.92rem;">
+              <input type="radio" name="payment_method_choice" value="Картка (Монобанка)" style="cursor: pointer;">
+              <span>💳 Картка (Банка)</span>
+            </label>
+          </div>
+
+          <!-- Monobank Jar Info Box (shown when card is chosen) -->
+          <div id="monobank-info-box" style="display: none; margin-top: 10px; padding: 12px; background: #fffbf0; border: 1px dashed #b8860b; border-radius: 2px;">
+            <div style="font-weight: bold; font-size: 0.9rem; margin-bottom: 6px; color: #7a5805;">
+              🐱 Оплата карткою на банку:
+            </div>
+            <p style="margin: 0 0 8px; font-size: 0.85rem; line-height: 1.4; color: var(--ink-dark);">
+              Оплатіть замовлення за посиланням у банку Monobank:
+            </p>
+            <a href="https://send.monobank.ua/jar/3XV7BZFVMW" target="_blank" rel="noopener noreferrer" 
+               class="btn-antique" 
+               style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; padding: 7px 14px; font-size: 0.9rem; background: #111; color: #fff; border-color: #111;">
+              🏦 Відкрити Монобанку ↗
+            </a>
+            <div style="margin-top: 6px; font-size: 0.78rem; font-style: italic; color: var(--ink-muted);">
+              Після поповнення поверніться на цю вкладку та натисніть кнопку «Відправити замовлення».
+            </div>
+          </div>
         </div>
 
+        <!-- Promo code Section -->
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label for="order-promocode" style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 4px; font-size: 0.9rem;">
+            Промокод (якщо є):
+          </label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="order-promocode" name="promocode" class="form-control" 
+                   placeholder="напр. РОДИНА" 
+                   style="flex: 1; padding: 7px 10px; font-family: var(--font-body); border: 1px solid var(--border-sepia); background: var(--bg-paper-light); text-transform: uppercase;">
+            <button type="button" id="btn-apply-promo" class="btn-antique" style="padding: 7px 14px; font-size: 0.88rem; cursor: pointer; white-space: nowrap;">
+              Застосувати
+            </button>
+          </div>
+          <!-- Promo code notification status -->
+          <div id="promo-status-msg" style="display: none; margin-top: 6px; padding: 6px 10px; font-size: 0.88rem; border-radius: 2px;"></div>
+        </div>
+
+        <!-- Wishes / Comment -->
         <div class="form-group" style="margin-bottom: 18px;">
-          <label for="order-comment" style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 4px;">Побажання бармену:</label>
-          <input type="text" id="order-comment" name="comment" class="form-control" placeholder="напр. більше льоду, твіст лайма...">
+          <label for="order-comment" style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 4px; font-size: 0.9rem;">Побажання бармену:</label>
+          <input type="text" id="order-comment" name="comment" class="form-control" placeholder="напр. без льоду, твіст лимона..." style="width: 100%; padding: 7px 10px; font-family: var(--font-body); border: 1px solid var(--border-sepia); background: var(--bg-paper-light);">
         </div>
 
+        <!-- Modal Actions -->
         <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-sepia); padding-top: 14px;">
-          <button type="button" class="btn-antique" id="btn-cancel-order" style="background: transparent;">Скасувати</button>
-          <button type="submit" class="btn-antique" id="btn-submit-order">Відправити замовлення</button>
+          <button type="button" class="btn-antique" id="btn-cancel-order" onclick="closeOrderModal()" style="background: transparent;">Скасувати</button>
+          <button type="submit" class="btn-antique" id="btn-submit-order" style="padding: 8px 16px; font-weight: bold;">Відправити замовлення</button>
         </div>
       </form>
 
     </div>
   </div>
 
+  <script>
+    // Failsafe direct handlers so the order modal opens even before or without external scripts
+    function openOrderModal(drinkName, volume) {
+      var modal = document.getElementById('orderModal');
+      var nameInput = document.getElementById('order-drink-name');
+      var display = document.getElementById('order-drink-display');
+      if (modal) {
+        if (nameInput) nameInput.value = drinkName;
+        if (display) display.textContent = volume ? (drinkName + ' (' + volume + ')') : drinkName;
+        modal.style.display = 'flex';
+      }
+    }
+    function closeOrderModal() {
+      var modal = document.getElementById('orderModal');
+      if (modal) modal.style.display = 'none';
+    }
+    // Close when clicking outside of modal card
+    window.addEventListener('click', function(e) {
+      var modal = document.getElementById('orderModal');
+      if (e.target === modal) {
+        closeOrderModal();
+      }
+    });
+  </script>
+
 {% endblock %}
 
 {% block scripts %}
-  <script src="{{ url_for('static', filename='js/newspaper.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/newspaper.js') }}?v={{ cache_bust }}"></script>
 {% endblock %}

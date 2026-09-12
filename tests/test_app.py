@@ -92,5 +92,35 @@ class BarAppTestCase(unittest.TestCase):
         self.assertEqual(enabled, '1')
         conn.close()
 
+    def test_order_with_payment_and_promocode(self):
+        # 1. Order with Monobank payment
+        resp1 = self.client.post('/api/order', json={
+            'drink_name': 'Мохіто',
+            'table_number': 'Бар 1',
+            'quantity': 1,
+            'payment_method': 'Картка (Монобанка)',
+            'promocode': ''
+        })
+        self.assertEqual(resp1.status_code, 200)
+        
+        # 2. Order with РОДИНА promo code (-100%)
+        resp2 = self.client.post('/api/order', json={
+            'drink_name': 'Апероль Спрітц',
+            'table_number': 'Стіл 2',
+            'quantity': 2,
+            'payment_method': 'Готівка',
+            'promocode': 'родина'
+        })
+        self.assertEqual(resp2.status_code, 200)
+
+        conn = get_db()
+        row1 = conn.execute("SELECT * FROM orders WHERE table_number = 'Бар 1'").fetchone()
+        self.assertEqual(row1['payment_method'], 'Картка (Монобанка)')
+        
+        row2 = conn.execute("SELECT * FROM orders WHERE table_number = 'Стіл 2'").fetchone()
+        self.assertIn('Промокод РОДИНА', row2['payment_method'])
+        self.assertEqual(row2['promocode'], 'родина')
+        conn.close()
+
 if __name__ == '__main__':
     unittest.main()
