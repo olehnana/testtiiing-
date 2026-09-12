@@ -128,13 +128,11 @@ DEFAULT_DRINKS = [
 ]
 
 DEFAULT_SETTINGS = {
-    "bar_name": "ШИНКОВИЙ ВІСНИКЪ",
-    "bar_tagline": "Офіційний орган питейної культури та вечірнього дозвілля",
-    "issue_info": "Випускъ № 12 • Видається щовечора • Вхід вільний",
-    "announcement": "УВАГА: Свіжа партія добірних дистилятів та колотого льоду щойно прибула до шинку! Запитуйте у бармена.",
-    "motto": "«In vino veritas, in cervisia felicitas, in bar omnibus gaudium»",
-    "bar_hours": "Щодня з 17:00 до останнього гостя",
-    "bar_address": "Головна вулиця, кут Джерельної, підвал за кованими дверима"
+    "bar_name": "МЕНЮ",
+    "bar_tagline": "Офіційне меню закладу",
+    "telegram_bot_token": "",
+    "telegram_chat_id": "",
+    "telegram_enabled": "0"
 }
 
 def get_db():
@@ -160,6 +158,20 @@ def init_db():
         image_path TEXT NOT NULL,
         is_available INTEGER DEFAULT 1,
         sort_order INTEGER DEFAULT 0
+    )
+    """)
+    
+    # Orders table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS orders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        drink_name TEXT NOT NULL,
+        table_number TEXT NOT NULL,
+        quantity INTEGER DEFAULT 1,
+        comment TEXT,
+        guest_name TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        status TEXT DEFAULT 'new'
     )
     """)
     

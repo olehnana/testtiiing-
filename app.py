@@ -2,6 +2,7 @@ import os
 import datetime
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session, flash
 from database import get_db, init_db
+from telegram_utils import send_telegram_message, format_order_message
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'bar_newspaper_secret_key_raspberrypi5_2026')
@@ -92,6 +93,52 @@ def api_drinks():
     conn.close()
     return jsonify({'success': True, 'drinks': drinks})
 
+@app.route('/api/order', methods=['POST'])
+def api_order():
+    data = request.get_json() or request.form
+    drink_name = data.get('drink_name', '').strip()
+    table_number = data.get('table_number', '').strip()
+    quantity = int(data.get('quantity', 1) or 1)
+    comment = data.get('comment', '').strip()
+    guest_name = data.get('guest_name', '').strip()
+    
+    if not drink_name or not table_number:
+        return jsonify({'success': False, 'error': "Оберіть напій та вкажіть номер столика / місце"}), 400
+        
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+    INSERT INTO orders (drink_name, table_number, quantity, comment, guest_name)
+    VALUES (?, ?, ?, ?, ?)
+    """, (drink_name, table_number, quantity, comment, guest_name))
+    order_id = cursor.lastrowid
+    conn.commit()
+    
+    # Check if Telegram Bot is configured and enabled
+    settings = get_all_settings()
+    tg_enabled = settings.get('telegram_enabled') == '1'
+    tg_token = settings.get('telegram_bot_token', '').strip()
+    tg_chat = settings.get('telegram_chat_id', '').strip()
+    
+    conn.close()
+    
+    if tg_enabled and tg_token and tg_chat:
+        order_obj = {
+            'id': order_id,
+            'drink_name': drink_name,
+            'table_number': table_number,
+            'quantity': quantity,
+            'comment': comment,
+            'guest_name': guest_name
+        }
+        msg = format_order_message(order_obj)
+        send_telegram_message(tg_token, tg_chat, msg)
+        
+    return jsonify({
+        'success': True,
+        'message': f"Замовлення на «{drink_name}» ({quantity} шт.) прийнято! Бармен уже готує його для {table_number}."
+    })
+
 # ================= ADMIN ROUTES =================
 
 @app.route('/admin/login', methods=['GET', 'POST'])
@@ -128,13 +175,79 @@ def admin_dashboard():
     drinks = [dict(r) for r in cursor.fetchall()]
     cursor.execute("SELECT DISTINCT category FROM drinks ORDER BY category ASC")
     categories = [r['category'] for r in cursor.fetchall()]
+    
+    # Fetch recent orders
+    cursor.execute("SELECT * FROM orders ORDER BY id DESC LIMIT 50")
+    orders = [dict(r) for r in cursor.fetchall()]
+    
     conn.close()
     
     return render_template(
         'admin_dashboard.html',
         drinks=drinks,
-        categories=categories
+        categories=categories,
+        orders=orders
     )
+
+@app.route('/admin/api/telegram_settings', methods=['POST'])
+def admin_telegram_settings():
+    if not session.get('is_admin'):
+        return jsonify({'success': False, 'error': 'Неавторизовано'}), 403
+        
+    token = request.form.get('telegram_bot_token', '').strip()
+    chat_id = request.form.get('telegram_chat_id', '').strip()
+    enabled = '1' if request.form.get('telegram_enabled') in ['1', 'on', 'true'] else '0'
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('telegram_bot_token', ?)", (token,))
+    cursor.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('telegram_chat_id', ?)", (chat_id,))
+    cursor.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('telegram_enabled', ?)", (enabled,))
+    conn.commit()
+    conn.close()
+    
+    flash('Налаштування Telegram-бота успішно збережено!', 'success')
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/api/test_telegram', methods=['POST'])
+def admin_test_telegram():
+    if not session.get('is_admin'):
+        return jsonify({'success': False, 'error': 'Неавторизовано'}), 403
+        
+    settings = get_all_settings()
+    token = settings.get('telegram_bot_token', '').strip()
+    chat_id = settings.get('telegram_chat_id', '').strip()
+    
+    if not token or not chat_id:
+        return jsonify({'success': False, 'error': 'Вкажіть токен бота та ID чату перед перевіркою'}), 400
+        
+    test_msg = "🍸 <b>Тестове сповіщення від бару!</b>\n\nTelegram-бот успішно налаштований і готовий приймати замовлення гостей у режимі реального часу."
+    ok, msg = send_telegram_message(token, chat_id, test_msg)
+    
+    if ok:
+        return jsonify({'success': True, 'message': 'Тестове повідомлення успішно надіслано в Telegram!'})
+    else:
+        return jsonify({'success': False, 'error': f'Помилка Telegram: {msg}'}), 400
+
+@app.route('/admin/api/order_status/<int:order_id>', methods=['POST'])
+def admin_order_status(order_id):
+    if not session.get('is_admin'):
+        return jsonify({'success': False, 'error': 'Неавторизовано'}), 403
+        
+    action = request.form.get('action') or request.json.get('action', 'complete')
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    if action == 'delete':
+        cursor.execute("DELETE FROM orders WHERE id = ?", (order_id,))
+        msg = "Замовлення видалено"
+    else:
+        cursor.execute("UPDATE orders SET status = 'completed' WHERE id = ?", (order_id,))
+        msg = "Замовлення позначено як виконане"
+        
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True, 'message': msg})
 
 @app.route('/admin/api/toggle/<int:drink_id>', methods=['POST'])
 def admin_toggle_availability(drink_id):

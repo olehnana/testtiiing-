@@ -196,4 +196,85 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   }
+
+  // Telegram bot test button
+  const testTgBtn = document.getElementById('btn-test-telegram');
+  if (testTgBtn) {
+    testTgBtn.addEventListener('click', async function () {
+      testTgBtn.disabled = true;
+      const orig = testTgBtn.innerHTML;
+      testTgBtn.innerHTML = '⏳ Відправляємо...';
+
+      try {
+        const res = await fetch('/admin/api/test_telegram', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('✓ ' + data.message);
+          showToast(data.message);
+        } else {
+          alert('✕ Помилка: ' + (data.error || 'Не вдалося надіслати'));
+        }
+      } catch (err) {
+        alert('Помилка мережі при перевірці Telegram-бота');
+      } finally {
+        testTgBtn.disabled = false;
+        testTgBtn.innerHTML = orig;
+      }
+    });
+  }
+
+  // Order status actions (complete / delete)
+  document.addEventListener('click', async function (e) {
+    const btn = e.target.closest('[data-action="complete-order"], [data-action="delete-order"]');
+    if (!btn) return;
+
+    const action = btn.getAttribute('data-action');
+    const orderId = btn.getAttribute('data-id');
+
+    if (action === 'complete-order') {
+      try {
+        const res = await fetch(`/admin/api/order_status/${orderId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'complete' })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message);
+          const row = document.getElementById(`order-row-${orderId}`);
+          if (row) {
+            row.style.backgroundColor = 'transparent';
+            row.style.fontWeight = 'normal';
+            const statusCell = row.cells[5];
+            if (statusCell) {
+              statusCell.innerHTML = '<span class="stamp stamp-available" style="font-size: 0.75rem; padding: 2px 6px;">ВИКОНАНО</span>';
+            }
+            btn.remove();
+          }
+        }
+      } catch (err) {
+        alert('Помилка оновлення статусу замовлення');
+      }
+    } else if (action === 'delete-order') {
+      if (!confirm('Видалити цей запис про замовлення?')) return;
+      try {
+        const res = await fetch(`/admin/api/order_status/${orderId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'delete' })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message);
+          const row = document.getElementById(`order-row-${orderId}`);
+          if (row) row.remove();
+        }
+      } catch (err) {
+        alert('Помилка видалення замовлення');
+      }
+    }
+  });
 });

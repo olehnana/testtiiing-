@@ -6,54 +6,127 @@
   
   <div class="admin-header">
     <div>
-      <h2 class="admin-title">Кабінет Редактора та Бармена</h2>
-      <p style="font-family: var(--font-headline); font-style: italic; color: var(--ink-muted);">Швидке перемикання наявності напоїв та редагування прейскуранту</p>
+      <h2 class="admin-title">Панель керування закладом</h2>
+      <p style="font-family: var(--font-headline); font-style: italic; color: var(--ink-muted);">Керування наявністю напоїв, замовленнями та Telegram-сповіщеннями</p>
     </div>
     
     <div class="admin-actions">
       <button type="button" class="btn-antique" id="btn-add-drink">+ Додати напій</button>
-      <a href="{{ url_for('index') }}" class="btn-antique" target="_blank">👁 Переглянути газету</a>
+      <a href="{{ url_for('index') }}" class="btn-antique" target="_blank">👁 Переглянути меню</a>
       <a href="{{ url_for('admin_logout') }}" class="btn-antique btn-antique-danger">Вийти</a>
     </div>
   </div>
 
-  <!-- Announcement & Bar Settings Form -->
-  <details style="margin-bottom: 24px; background: var(--bg-paper-dark); border: 1px solid var(--border-sepia); padding: 14px 18px;">
-    <summary style="font-family: var(--font-headline); font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 1rem;">
-      ⚙ Налаштування закладу та термінових оголошень (Натисніть для редагування)
-    </summary>
-    
-    <form method="POST" action="{{ url_for('admin_update_settings') }}" style="margin-top: 16px;">
+  <!-- Telegram Bot Integration Settings -->
+  <div style="background: var(--bg-paper-dark); border: 2px solid var(--ink-black); padding: 18px 22px; margin-bottom: 24px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border-sepia); padding-bottom: 8px;">
+      <h3 style="font-family: var(--font-headline); font-size: 1.15rem; text-transform: uppercase; margin: 0; display: flex; align-items: center; gap: 8px;">
+        📲 Telegram-Бот (Миттєві сповіщення про замовлення)
+      </h3>
+      <span style="font-family: var(--font-mono); font-size: 0.85rem; font-weight: bold; padding: 2px 8px; border: 1px solid; {% if settings.telegram_enabled == '1' %}color: var(--stamp-green); border-color: var(--stamp-green); background: #e8f5e9;{% else %}color: var(--ink-muted); border-color: var(--border-light);{% endif %}">
+        {% if settings.telegram_enabled == '1' %}● СПОВІЩЕННЯ УВІМКНЕНО{% else %}○ ВИМКНЕНО{% endif %}
+      </span>
+    </div>
+
+    <form method="POST" action="{{ url_for('admin_telegram_settings') }}">
       <div class="form-row">
         <div class="form-group">
-          <label for="bar_name">Назва видання / бару:</label>
-          <input type="text" id="bar_name" name="bar_name" class="form-control" value="{{ settings.bar_name }}">
+          <label for="telegram_bot_token">Токен Telegram-бота (від @BotFather):</label>
+          <input type="text" id="telegram_bot_token" name="telegram_bot_token" class="form-control" 
+                 value="{{ settings.telegram_bot_token }}" placeholder="123456789:ABCdefGhIJKlmNoPQRstuvWXyz">
         </div>
         <div class="form-group">
-          <label for="bar_tagline">Підзаголовок:</label>
-          <input type="text" id="bar_tagline" name="bar_tagline" class="form-control" value="{{ settings.bar_tagline }}">
+          <label for="telegram_chat_id">ID чату або групи (куди слати замовлення):</label>
+          <input type="text" id="telegram_chat_id" name="telegram_chat_id" class="form-control" 
+                 value="{{ settings.telegram_chat_id }}" placeholder="напр. 987654321 або -100123456789">
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="announcement">Текст екстреного оголошення (показується на першій шпальті):</label>
-        <input type="text" id="announcement" name="announcement" class="form-control" value="{{ settings.announcement }}">
-      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 6px;">
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-family: var(--font-headline); font-weight: bold;">
+          <input type="checkbox" name="telegram_enabled" value="1" style="width: 18px; height: 18px;" 
+                 {% if settings.telegram_enabled == '1' %}checked{% endif %}>
+          <span>Увімкнути сповіщення в Telegram при нових замовленнях гостей</span>
+        </label>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="bar_hours">Години роботи:</label>
-          <input type="text" id="bar_hours" name="bar_hours" class="form-control" value="{{ settings.bar_hours }}">
-        </div>
-        <div class="form-group">
-          <label for="bar_address">Адреса та орієнтир:</label>
-          <input type="text" id="bar_address" name="bar_address" class="form-control" value="{{ settings.bar_address }}">
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn-antique" id="btn-test-telegram" style="background: transparent;">
+            📩 Тест бота
+          </button>
+          <button type="submit" class="btn-antique">
+            Зберегти налаштування бота
+          </button>
         </div>
       </div>
-
-      <button type="submit" class="btn-antique" style="margin-top: 8px;">Зберегти налаштування газети</button>
     </form>
-  </details>
+    <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-faint); margin-top: 10px;">
+      💡 Підказка: створіть бота через @BotFather (/newbot) і отримайте токен. Щоб дізнатися свій Chat ID, напишіть боту @userinfobot.
+    </div>
+  </div>
+
+  <!-- Incoming Orders Table (if any) -->
+  <div style="background: var(--bg-paper-light); border: 2px solid var(--border-sepia); padding: 18px; margin-bottom: 30px;">
+    <h3 style="font-family: var(--font-headline); text-transform: uppercase; margin-bottom: 12px; font-size: 1.15rem; display: flex; justify-content: space-between; align-items: center;">
+      <span>🛎 Останні замовлення від гостей (Всього: {{ orders|length }})</span>
+      <span style="font-size: 0.8rem; font-family: var(--font-mono); color: var(--ink-muted);">Автоматично оновлюється</span>
+    </h3>
+
+    {% if orders %}
+    <div style="overflow-x: auto;">
+      <table class="admin-table" style="margin-bottom: 0;">
+        <thead>
+          <tr>
+            <th style="width: 50px;">#</th>
+            <th>Час</th>
+            <th>Стіл / Місце</th>
+            <th>Напій та Кількість</th>
+            <th>Гість / Коментар</th>
+            <th style="text-align: center; width: 140px;">Статус</th>
+            <th style="text-align: right; width: 120px;">Дії</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ord in orders %}
+          <tr id="order-row-{{ ord.id }}" style="{% if ord.status == 'new' %}background-color: #fff9e6; font-weight: 500;{% endif %}">
+            <td style="font-family: var(--font-mono);">{{ ord.id }}</td>
+            <td style="font-family: var(--font-mono); font-size: 0.85rem;">{{ ord.created_at }}</td>
+            <td><strong style="font-family: var(--font-headline); font-size: 1.05rem;">{{ ord.table_number }}</strong></td>
+            <td>
+              <span style="font-weight: bold;">{{ ord.drink_name }}</span> 
+              <span style="background: var(--bg-paper-dark); padding: 2px 6px; border: 1px solid var(--border-light); font-family: var(--font-mono);">x{{ ord.quantity }}</span>
+            </td>
+            <td style="font-size: 0.88rem;">
+              {% if ord.guest_name %}<strong>{{ ord.guest_name }}</strong><br>{% endif %}
+              {% if ord.comment %}<i>{{ ord.comment }}</i>{% else %}<span style="color: var(--ink-faint);">-</span>{% endif %}
+            </td>
+            <td style="text-align: center;">
+              {% if ord.status == 'new' %}
+                <span class="stamp stamp-sold-out" style="font-size: 0.75rem; transform: none; padding: 2px 6px;">НОВЕ</span>
+              {% else %}
+                <span class="stamp stamp-available" style="font-size: 0.75rem; padding: 2px 6px;">ВИКОНАНО</span>
+              {% endif %}
+            </td>
+            <td style="text-align: right;">
+              {% if ord.status == 'new' %}
+              <button type="button" class="btn-antique" style="padding: 2px 6px; font-size: 0.75rem;" 
+                      data-action="complete-order" data-id="{{ ord.id }}" title="Позначити виконаним">
+                ✓
+              </button>
+              {% endif %}
+              <button type="button" class="btn-antique btn-antique-danger" style="padding: 2px 6px; font-size: 0.75rem;" 
+                      data-action="delete-order" data-id="{{ ord.id }}" title="Видалити запис">
+                🗑
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <p style="font-style: italic; color: var(--ink-muted); margin: 8px 0;">Поки що немає замовлень. Коли гість натисне кнопку «Замовити» у меню, замовлення з'явиться тут та полетить у Telegram-бота.</p>
+    {% endif %}
+  </div>
 
   <!-- Drinks Table -->
   <h3 style="font-family: var(--font-headline); text-transform: uppercase; margin-bottom: 12px; font-size: 1.25rem;">

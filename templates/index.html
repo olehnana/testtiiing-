@@ -55,10 +55,16 @@
       <!-- Description -->
       <p class="drink-description">{{ drink.description }}</p>
 
-      <!-- Availability Stamp (No prices!) -->
+      <!-- Availability Stamp & Order Button (No prices!) -->
       <div class="card-footer-stamp">
         {% if drink.is_available %}
           <span class="stamp stamp-available">В наявності</span>
+          <button type="button" class="btn-antique btn-order-trigger" 
+                  data-name="{{ drink.name }}" 
+                  data-volume="{{ drink.volume }}"
+                  style="padding: 5px 12px; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+            🛎 Замовити
+          </button>
         {% else %}
           <span class="stamp stamp-sold-out">Тимчасово розпродано</span>
         {% endif %}
@@ -66,6 +72,55 @@
 
     </article>
     {% endfor %}
+  </div>
+
+  <!-- Order Modal Dialog -->
+  <div id="orderModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); z-index: 10000; align-items: center; justify-content: center; padding: 16px;">
+    <div style="background: var(--bg-paper); border: 2px solid var(--ink-black); max-width: 460px; width: 100%; padding: 26px; box-shadow: 0 10px 35px rgba(0,0,0,0.4); position: relative;">
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--ink-black); padding-bottom: 10px; margin-bottom: 16px;">
+        <h3 style="font-family: var(--font-masthead); font-size: 1.25rem; text-transform: uppercase; margin: 0;">
+          🛎 Швидке замовлення
+        </h3>
+        <button type="button" id="btn-close-order" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">✕</button>
+      </div>
+
+      <form id="orderForm">
+        <input type="hidden" id="order-drink-name" name="drink_name">
+
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 4px;">Обраний напій:</label>
+          <div id="order-drink-display" style="font-family: var(--font-headline); font-size: 1.15rem; font-weight: bold; color: var(--ink-dark); background: var(--bg-paper-light); padding: 8px 12px; border: 1px solid var(--border-sepia);"></div>
+        </div>
+
+        <div class="form-row" style="margin-bottom: 14px;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="order-table" style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 4px;">Номер столика / Бар *:</label>
+            <input type="text" id="order-table" name="table_number" class="form-control" placeholder="Стіл 3 чи Бар" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="order-qty" style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 4px;">Кількість:</label>
+            <input type="number" id="order-qty" name="quantity" class="form-control" value="1" min="1" max="20" required>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label for="order-guest" style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 4px;">Ваше ім'я (за бажанням):</label>
+          <input type="text" id="order-guest" name="guest_name" class="form-control" placeholder="Як до вас звертатися?">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 18px;">
+          <label for="order-comment" style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 4px;">Побажання бармену:</label>
+          <input type="text" id="order-comment" name="comment" class="form-control" placeholder="напр. більше льоду, твіст лайма...">
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-sepia); padding-top: 14px;">
+          <button type="button" class="btn-antique" id="btn-cancel-order" style="background: transparent;">Скасувати</button>
+          <button type="submit" class="btn-antique" id="btn-submit-order">Відправити замовлення</button>
+        </div>
+      </form>
+
+    </div>
   </div>
 
 {% endblock %}

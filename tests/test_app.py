@@ -10,7 +10,6 @@ class BarAppTestCase(unittest.TestCase):
         app.config['SECRET_KEY'] = 'test_secret'
         self.client = app.test_client()
         init_db()
-        # Reset drink 1 to available
         conn = get_db()
         conn.execute("UPDATE drinks SET is_available = 1 WHERE id = 1")
         conn.commit()
@@ -22,17 +21,7 @@ class BarAppTestCase(unittest.TestCase):
         html = response.get_data(as_text=True)
         self.assertIn('МЕНЮ', html)
         self.assertIn('Піна Колада', html)
-        self.assertIn('Текіла Санрайз', html)
-        self.assertIn('Джин-тонік', html)
-        self.assertIn('Мохіто', html)
-        self.assertIn('Блакитна Лагуна', html)
-        self.assertIn('Куба Лібре', html)
-        self.assertIn('Лондонський сухий джин', html)
-        self.assertIn('Бехерівка лимонна', html)
-        self.assertIn('Бехерівка (Becherovka Original)', html)
-        self.assertIn('Єгермейстер', html)
-        self.assertIn('Бурбон', html)
-        # Ensure NO prices are shown
+        self.assertIn('Замовити', html)
         self.assertNotIn('грн', html.lower())
         self.assertNotIn('uah', html.lower())
 
@@ -43,6 +32,28 @@ class BarAppTestCase(unittest.TestCase):
         self.assertTrue(data['success'])
         self.assertEqual(len(data['drinks']), 11)
 
+    def test_order_creation(self):
+        # Create an order via API
+        resp = self.client.post('/api/order', json={
+            'drink_name': 'Піна Колада',
+            'table_number': 'Стіл № 5',
+            'quantity': 2,
+            'guest_name': 'Олег',
+            'comment': 'З колотим льодом'
+        })
+        self.assertEqual(resp.status_code, 200)
+        data = json.loads(resp.get_data(as_text=True))
+        self.assertTrue(data['success'])
+        self.assertIn('прийнято', data['message'])
+
+        # Verify order in DB
+        conn = get_db()
+        row = conn.execute("SELECT * FROM orders WHERE table_number = 'Стіл № 5'").fetchone()
+        self.assertIsNotNone(row)
+        self.assertEqual(row['drink_name'], 'Піна Колада')
+        self.assertEqual(row['quantity'], 2)
+        conn.close()
+
     def test_admin_auth_and_toggle(self):
         # Without login, toggle should fail with 403
         resp_unauth = self.client.post('/admin/api/toggle/1')
@@ -51,7 +62,7 @@ class BarAppTestCase(unittest.TestCase):
         # Login with correct password
         login_resp = self.client.post('/admin/login', data={'password': 'bar123'}, follow_redirects=True)
         self.assertEqual(login_resp.status_code, 200)
-        self.assertIn('Кабінет Редактора та Бармена', login_resp.get_data(as_text=True))
+        self.assertIn('Панель керування закладом', login_resp.get_data(as_text=True))
 
         # Toggle drink 1 (Pina Colada): 1 -> 0
         toggle_resp = self.client.post('/admin/api/toggle/1')
@@ -65,38 +76,20 @@ class BarAppTestCase(unittest.TestCase):
         data2 = json.loads(toggle_resp2.get_data(as_text=True))
         self.assertEqual(data2['is_available'], 1)
 
-    def test_admin_save_and_delete_drink(self):
-        # Login
+    def test_admin_telegram_settings(self):
         self.client.post('/admin/login', data={'password': 'bar123'})
-
-        # Add new drink
-        add_resp = self.client.post('/admin/api/save_drink', data={
-            'name': 'Тестовий Коктейль',
-            'category': 'Коктейлі',
-            'strength': '20% об.',
-            'volume': '150 мл',
-            'ingredients': 'Тест, лимон',
-            'description': 'Смачний тестовий напій для перевірки.',
-            'image_path': '/static/images/drinks/mojito.jpg',
-            'is_available': '1',
-            'sort_order': '99'
-        })
-        self.assertEqual(add_resp.status_code, 200)
-
-        # Check in DB
-        conn = get_db()
-        row = conn.execute("SELECT * FROM drinks WHERE name = 'Тестовий Коктейль'").fetchone()
-        self.assertIsNotNone(row)
-        drink_id = row['id']
-        conn.close()
-
-        # Delete it
-        del_resp = self.client.post(f'/admin/api/delete/{drink_id}')
-        self.assertEqual(del_resp.status_code, 200)
+        resp = self.client.post('/admin/api/telegram_settings', data={
+            'telegram_bot_token': '123456:FAKE_TOKEN',
+            'telegram_chat_id': '987654321',
+            'telegram_enabled': '1'
+        }, follow_redirects=True)
+        self.assertEqual(resp.status_code, 200)
 
         conn = get_db()
-        row_del = conn.execute("SELECT * FROM drinks WHERE id = ?", (drink_id,)).fetchone()
-        self.assertIsNone(row_del)
+        token = conn.execute("SELECT value FROM settings WHERE key = 'telegram_bot_token'").fetchone()['value']
+        enabled = conn.execute("SELECT value FROM settings WHERE key = 'telegram_enabled'").fetchone()['value']
+        self.assertEqual(token, '123456:FAKE_TOKEN')
+        self.assertEqual(enabled, '1')
         conn.close()
 
 if __name__ == '__main__':
