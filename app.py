@@ -65,7 +65,7 @@ init_db()
 def index():
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM drinks ORDER BY sort_order ASC, id ASC")
+    cursor.execute("SELECT * FROM drinks ORDER BY is_available DESC, sort_order ASC, id ASC")
     drinks = cursor.fetchall()
     
     # Extract distinct categories
@@ -88,7 +88,7 @@ def index():
 def api_drinks():
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM drinks ORDER BY sort_order ASC, id ASC")
+    cursor.execute("SELECT * FROM drinks ORDER BY is_available DESC, sort_order ASC, id ASC")
     drinks = [dict(r) for r in cursor.fetchall()]
     conn.close()
     return jsonify({'success': True, 'drinks': drinks})

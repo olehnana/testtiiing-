@@ -356,6 +356,7 @@ body {
   position: relative;
   box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  order: 1;
 }
 
 .drink-card:hover {
@@ -363,11 +364,12 @@ body {
   box-shadow: 4px 6px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* Out of stock greyed styling */
+/* Out of stock greyed styling: automatically flies to the bottom */
 .drink-card.out-of-stock {
-  opacity: 0.72;
-  filter: grayscale(25%);
-  background-color: #ede6d8;
+  opacity: 0.65;
+  filter: grayscale(35%);
+  background-color: #eae2d1;
+  order: 999 !important;
 }
 
 /* Drink photo engraving frame */
