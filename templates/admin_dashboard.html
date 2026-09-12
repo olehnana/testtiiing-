@@ -38,7 +38,7 @@
         <div class="form-group">
           <label for="telegram_chat_id">ID чату або групи (куди слати замовлення):</label>
           <input type="text" id="telegram_chat_id" name="telegram_chat_id" class="form-control" 
-                 value="{{ settings.telegram_chat_id }}" placeholder="напр. 987654321 або -100123456789">
+                 value="{{ settings.telegram_chat_id }}" placeholder="987654321 або -100123456789">
         </div>
       </div>
 
@@ -139,6 +139,66 @@
     {% endif %}
   </div>
 
+  <!-- Feedback & Suggestions Section -->
+  <div style="background: var(--bg-paper-light); border: 2px solid var(--border-sepia); padding: 18px; margin-bottom: 30px;">
+    <h3 style="font-family: var(--font-headline); text-transform: uppercase; margin-bottom: 12px; font-size: 1.15rem; display: flex; justify-content: space-between; align-items: center;">
+      <span>💬 Відгуки та пропозиції від гостей (Всього: {{ feedbacks|length }})</span>
+      <span style="font-size: 0.8rem; font-family: var(--font-mono); color: var(--ink-muted);">Автоматично оновлюється</span>
+    </h3>
+
+    {% if feedbacks %}
+    <div style="overflow-x: auto;">
+      <table class="admin-table" style="margin-bottom: 0;">
+        <thead>
+          <tr>
+            <th style="width: 50px;">#</th>
+            <th>Час</th>
+            <th>Тип</th>
+            <th>Оцінка</th>
+            <th>Гість</th>
+            <th>Повідомлення</th>
+            <th style="text-align: right; width: 80px;">Дії</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for fb in feedbacks %}
+          <tr id="feedback-row-{{ fb.id }}">
+            <td style="font-family: var(--font-mono);">{{ fb.id }}</td>
+            <td style="font-family: var(--font-mono); font-size: 0.85rem;">{{ fb.created_at }}</td>
+            <td>
+              {% if fb.feedback_type == 'Пропозиція' %}
+                <span style="background: #fff3e0; color: #e65100; border: 1px solid #ffe0b2; padding: 2px 6px; font-size: 0.82rem; font-weight: bold;">💡 Пропозиція</span>
+              {% else %}
+                <span style="background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; padding: 2px 6px; font-size: 0.82rem; font-weight: bold;">⭐ Відгук</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if fb.rating %}
+                <span style="color: #f57f17; font-weight: bold;">{{ "⭐" * fb.rating }} ({{ fb.rating }}/5)</span>
+              {% else %}
+                <span style="color: var(--ink-faint);">-</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if fb.guest_name %}<strong>{{ fb.guest_name }}</strong>{% else %}<i>Анонімно</i>{% endif %}
+            </td>
+            <td style="font-size: 0.92rem; white-space: pre-wrap;">{{ fb.message }}</td>
+            <td style="text-align: right;">
+              <button type="button" class="btn-antique btn-antique-danger" style="padding: 2px 6px; font-size: 0.75rem;" 
+                      data-action="delete-feedback" data-id="{{ fb.id }}" title="Видалити запис">
+                🗑
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <p style="font-style: italic; color: var(--ink-muted); margin: 8px 0;">Поки що немає відгуків чи пропозицій. Коли гості залишать відгук через кнопку у меню, він з'явиться тут та полетить у Telegram-бота.</p>
+    {% endif %}
+  </div>
+
   <!-- Drinks Table -->
   <h3 style="font-family: var(--font-headline); text-transform: uppercase; margin-bottom: 12px; font-size: 1.25rem;">
     Каталог напоїв (Натискайте на кнопку для миттєвої зміни наявності):
@@ -234,11 +294,11 @@
       <div class="form-row">
         <div class="form-group">
           <label for="form-strength">Міцність:</label>
-          <input type="text" id="form-strength" name="strength" class="form-control" placeholder="напр. 15% об.">
+          <input type="text" id="form-strength" name="strength" class="form-control" placeholder="15% об.">
         </div>
         <div class="form-group">
           <label for="form-volume">Об'єм подачі:</label>
-          <input type="text" id="form-volume" name="volume" class="form-control" placeholder="напр. 200 мл">
+          <input type="text" id="form-volume" name="volume" class="form-control" placeholder="200 мл">
         </div>
       </div>
 

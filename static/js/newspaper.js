@@ -213,4 +213,70 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   }
+
+  // ================= FEEDBACK & SUGGESTIONS MODAL LOGIC =================
+  const feedbackModal = document.getElementById('feedbackModal');
+  const feedbackForm = document.getElementById('feedbackForm');
+  const btnCloseFeedback = document.getElementById('btn-close-feedback');
+  const btnCancelFeedback = document.getElementById('btn-cancel-feedback');
+  const btnSubmitFeedback = document.getElementById('btn-submit-feedback');
+
+  function openFeedbackModal() {
+    if (feedbackModal) {
+      if (feedbackForm) feedbackForm.reset();
+      feedbackModal.style.display = 'flex';
+    }
+  }
+
+  function closeFeedbackModal() {
+    if (feedbackModal) {
+      feedbackModal.style.display = 'none';
+    }
+  }
+
+  window.openFeedbackModal = openFeedbackModal;
+  window.closeFeedbackModal = closeFeedbackModal;
+
+  if (btnCloseFeedback) btnCloseFeedback.addEventListener('click', closeFeedbackModal);
+  if (btnCancelFeedback) btnCancelFeedback.addEventListener('click', closeFeedbackModal);
+
+  if (feedbackForm) {
+    feedbackForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      btnSubmitFeedback.disabled = true;
+      const originalText = btnSubmitFeedback.textContent;
+      btnSubmitFeedback.textContent = 'Надсилаємо...';
+
+      const typeChoice = document.querySelector('input[name="feedback_type_choice"]:checked');
+      const ratingChoice = document.querySelector('input[name="feedback_rating_val"]:checked');
+
+      const payload = {
+        feedback_type: typeChoice ? typeChoice.value : 'Відгук',
+        guest_name: document.getElementById('feedback-guest').value.trim(),
+        rating: ratingChoice ? parseInt(ratingChoice.value, 10) : 5,
+        message: document.getElementById('feedback-msg').value.trim()
+      };
+
+      try {
+        const res = await fetch('/api/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          closeFeedbackModal();
+          alert('✓ ' + data.message);
+        } else {
+          alert('Помилка: ' + (data.error || 'Не вдалося надіслати відгук'));
+        }
+      } catch (err) {
+        alert('Помилка мережі при відправці відгуку.');
+      } finally {
+        btnSubmitFeedback.disabled = false;
+        btnSubmitFeedback.textContent = originalText;
+      }
+    });
+  }
 });
+

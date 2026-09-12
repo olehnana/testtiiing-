@@ -2,7 +2,7 @@ import os
 import datetime
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session, flash
 from database import get_db, init_db
-from telegram_utils import send_telegram_message, format_order_message
+from telegram_utils import send_telegram_message, format_order_message, format_feedback_message
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'bar_newspaper_secret_key_raspberrypi5_2026')
@@ -148,6 +148,50 @@ def api_order():
         'message': f"Замовлення на «{drink_name}» ({quantity} шт.) прийнято! Бармен уже готує його для {table_number}."
     })
 
+@app.route('/api/feedback', methods=['POST'])
+def api_feedback():
+    data = request.get_json() or {}
+    feedback_type = data.get('feedback_type', 'Відгук').strip()
+    guest_name = data.get('guest_name', '').strip()
+    message = data.get('message', '').strip()
+    rating = data.get('rating')
+    try:
+        rating = int(rating) if rating else None
+    except (ValueError, TypeError):
+        rating = None
+        
+    if not message:
+        return jsonify({'success': False, 'error': "Будь ласка, введіть текст вашого відгуку або пропозиції"}), 400
+        
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+    INSERT INTO feedback (feedback_type, guest_name, rating, message)
+    VALUES (?, ?, ?, ?)
+    """, (feedback_type, guest_name, rating, message))
+    feedback_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    
+    # Send Telegram notification if enabled
+    settings = get_all_settings()
+    if settings.get('telegram_enabled') == '1':
+        tg_token = settings.get('telegram_bot_token')
+        tg_chat = settings.get('telegram_chat_id')
+        fb_obj = {
+            'feedback_type': feedback_type,
+            'guest_name': guest_name,
+            'rating': rating,
+            'message': message
+        }
+        msg = format_feedback_message(fb_obj)
+        send_telegram_message(tg_token, tg_chat, msg)
+        
+    return jsonify({
+        'success': True,
+        'message': "Щиро дякуємо за ваш відгук! Ми постійно покращуємо наш заклад завдяки вашим думкам."
+    })
+
 # ================= ADMIN ROUTES =================
 
 @app.route('/admin/login', methods=['GET', 'POST'])
@@ -189,14 +233,31 @@ def admin_dashboard():
     cursor.execute("SELECT * FROM orders ORDER BY id DESC LIMIT 50")
     orders = [dict(r) for r in cursor.fetchall()]
     
+    # Fetch recent feedback & suggestions
+    cursor.execute("SELECT * FROM feedback ORDER BY id DESC LIMIT 50")
+    feedbacks = [dict(r) for r in cursor.fetchall()]
+    
     conn.close()
     
     return render_template(
         'admin_dashboard.html',
         drinks=drinks,
         categories=categories,
-        orders=orders
+        orders=orders,
+        feedbacks=feedbacks
     )
+
+@app.route('/admin/api/feedback/delete/<int:feedback_id>', methods=['POST'])
+def admin_delete_feedback(feedback_id):
+    if not session.get('is_admin'):
+        return jsonify({'success': False, 'error': 'Неавторизовано'}), 403
+        
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM feedback WHERE id = ?", (feedback_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True, 'feedback_id': feedback_id})
 
 @app.route('/admin/api/telegram_settings', methods=['POST'])
 def admin_telegram_settings():

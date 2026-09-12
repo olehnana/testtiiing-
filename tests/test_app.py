@@ -122,5 +122,42 @@ class BarAppTestCase(unittest.TestCase):
         self.assertEqual(row2['promocode'], 'родина')
         conn.close()
 
+    def test_feedback_creation_and_admin_view(self):
+        # 1. Post a review
+        resp = self.client.post('/api/feedback', json={
+            'feedback_type': 'Відгук',
+            'guest_name': 'Іван',
+            'rating': 5,
+            'message': 'Чудовий бар та смачні коктейлі!'
+        })
+        self.assertEqual(resp.status_code, 200)
+        data = json.loads(resp.get_data(as_text=True))
+        self.assertTrue(data['success'])
+
+        # 2. Check DB
+        conn = get_db()
+        fb = conn.execute("SELECT * FROM feedback WHERE guest_name = 'Іван'").fetchone()
+        self.assertIsNotNone(fb)
+        self.assertEqual(fb['feedback_type'], 'Відгук')
+        self.assertEqual(fb['rating'], 5)
+        self.assertEqual(fb['message'], 'Чудовий бар та смачні коктейлі!')
+        fb_id = fb['id']
+        conn.close()
+
+        # 3. Check admin view
+        self.client.post('/admin/login', data={'password': 'bar123'})
+        admin_resp = self.client.get('/admin')
+        self.assertIn('Чудовий бар та смачні коктейлі!', admin_resp.get_data(as_text=True))
+
+        # 4. Admin delete feedback
+        del_resp = self.client.post(f'/admin/api/feedback/delete/{fb_id}')
+        self.assertEqual(del_resp.status_code, 200)
+
+        conn = get_db()
+        fb_after = conn.execute("SELECT * FROM feedback WHERE id = ?", (fb_id,)).fetchone()
+        self.assertIsNone(fb_after)
+        conn.close()
+
 if __name__ == '__main__':
     unittest.main()
+

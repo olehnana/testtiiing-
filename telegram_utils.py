@@ -72,3 +72,31 @@ def format_order_message(order):
     lines.append("⏰ <i>Замовлення зафіксовано в системі</i>")
     
     return "\n".join(lines)
+
+
+def format_feedback_message(feedback):
+    """
+    Formats a feedback/suggestion object into a clear Telegram message.
+    """
+    fb_type = feedback.get('feedback_type', 'Відгук')
+    icon = "⭐" if fb_type == 'Відгук' else "💡"
+    lines = [
+        f"{icon} <b>НОВИЙ {fb_type.upper()} ВІД ГОСТЯ!</b>",
+        "────────────────────",
+        f"📌 <b>Тип:</b> {fb_type}",
+    ]
+    if feedback.get('guest_name'):
+        lines.append(f"👤 <b>Гість:</b> {feedback.get('guest_name')}")
+    else:
+        lines.append("👤 <b>Гість:</b> Анонімно")
+        
+    if feedback.get('rating'):
+        stars = "⭐" * int(feedback.get('rating'))
+        lines.append(f"✨ <b>Оцінка:</b> {stars} ({feedback.get('rating')}/5)")
+        
+    lines.append(f"💬 <b>Повідомлення:</b>\n<i>{feedback.get('message', '').strip()}</i>")
+    lines.append("────────────────────")
+    lines.append("⏰ <i>Надіслано через форму на сайті</i>")
+    
+    return "\n".join(lines)
+

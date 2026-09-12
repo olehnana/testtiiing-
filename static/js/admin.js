@@ -275,6 +275,23 @@ document.addEventListener('DOMContentLoaded', function () {
       } catch (err) {
         alert('Помилка видалення замовлення');
       }
+    } else if (action === 'delete-feedback') {
+      const fbId = btn.getAttribute('data-id');
+      if (!confirm('Видалити цей відгук / пропозицію?')) return;
+      try {
+        const res = await fetch(`/admin/api/feedback/delete/${fbId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Запис успішно видалено');
+          const row = document.getElementById(`feedback-row-${fbId}`);
+          if (row) row.remove();
+        }
+      } catch (err) {
+        alert('Помилка видалення відгуку');
+      }
     }
   });
 });

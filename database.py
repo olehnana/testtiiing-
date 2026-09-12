@@ -187,6 +187,18 @@ def init_db():
     except Exception:
         pass
     
+    # Feedback & Suggestions table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS feedback (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        feedback_type TEXT DEFAULT 'Відгук',
+        guest_name TEXT,
+        rating INTEGER,
+        message TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+    
     # Settings table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS settings (

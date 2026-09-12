@@ -2,6 +2,13 @@
 
 {% block content %}
 
+  <!-- Top Action & Feedback Bar -->
+  <div style="display: flex; justify-content: flex-end; margin-bottom: 14px;">
+    <button type="button" class="btn-antique" id="btn-open-feedback" onclick="openFeedbackModal()" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; font-size: 0.88rem; cursor: pointer;">
+      ✍️ Відгуки та пропозиції
+    </button>
+  </div>
+
   <!-- Filter & Search Controls Bar -->
   <nav class="newspaper-nav" style="margin-top: 0; margin-bottom: 20px;" aria-label="Категорії меню">
     <div class="category-filters">
@@ -99,7 +106,7 @@
         <div class="form-row" style="margin-bottom: 14px; display: flex; gap: 12px;">
           <div class="form-group" style="flex: 2; margin-bottom: 0;">
             <label for="order-table" style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 4px; font-size: 0.9rem;">Номер столика / Бар *:</label>
-            <input type="text" id="order-table" name="table_number" class="form-control" placeholder="напр. Стіл 3 чи Бар" required style="width: 100%; padding: 7px 10px; font-family: var(--font-body); border: 1px solid var(--border-sepia); background: var(--bg-paper-light);">
+            <input type="text" id="order-table" name="table_number" class="form-control" placeholder="Стіл або Бар" required style="width: 100%; padding: 7px 10px; font-family: var(--font-body); border: 1px solid var(--border-sepia); background: var(--bg-paper-light);">
           </div>
           <div class="form-group" style="flex: 1; margin-bottom: 0;">
             <label for="order-qty" style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 4px; font-size: 0.9rem;">Кількість:</label>
@@ -153,7 +160,7 @@
           </label>
           <div style="display: flex; gap: 8px;">
             <input type="text" id="order-promocode" name="promocode" class="form-control" 
-                   placeholder="напр. РОДИНА" 
+                   placeholder="Введіть промокод" 
                    style="flex: 1; padding: 7px 10px; font-family: var(--font-body); border: 1px solid var(--border-sepia); background: var(--bg-paper-light); text-transform: uppercase;">
             <button type="button" id="btn-apply-promo" class="btn-antique" style="padding: 7px 14px; font-size: 0.88rem; cursor: pointer; white-space: nowrap;">
               Застосувати
@@ -166,7 +173,7 @@
         <!-- Wishes / Comment -->
         <div class="form-group" style="margin-bottom: 18px;">
           <label for="order-comment" style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 4px; font-size: 0.9rem;">Побажання бармену:</label>
-          <input type="text" id="order-comment" name="comment" class="form-control" placeholder="напр. без льоду, твіст лимона..." style="width: 100%; padding: 7px 10px; font-family: var(--font-body); border: 1px solid var(--border-sepia); background: var(--bg-paper-light);">
+          <input type="text" id="order-comment" name="comment" class="form-control" placeholder="Без льоду, твіст лимона..." style="width: 100%; padding: 7px 10px; font-family: var(--font-body); border: 1px solid var(--border-sepia); background: var(--bg-paper-light);">
         </div>
 
         <!-- Modal Actions -->
@@ -179,8 +186,69 @@
     </div>
   </div>
 
+  <!-- Feedback & Suggestions Modal Dialog -->
+  <div id="feedbackModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center; padding: 16px; overflow-y: auto;">
+    <div style="background: var(--bg-paper); border: 2px solid var(--ink-black); max-width: 480px; width: 100%; padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.45); position: relative; margin: auto;">
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--ink-black); padding-bottom: 10px; margin-bottom: 16px;">
+        <h3 style="font-family: var(--font-masthead); font-size: 1.25rem; text-transform: uppercase; margin: 0; display: flex; align-items: center; gap: 8px;">
+          ✍️ Відгуки та пропозиції
+        </h3>
+        <button type="button" id="btn-close-feedback" onclick="closeFeedbackModal()" style="background: none; border: none; font-size: 1.6rem; cursor: pointer; line-height: 1; padding: 0 4px;">✕</button>
+      </div>
+
+      <form id="feedbackForm">
+        <!-- Message Type Selection -->
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 6px; font-size: 0.9rem;">Тип повідомлення *:</label>
+          <div style="display: flex; gap: 10px;">
+            <label style="flex: 1; display: flex; align-items: center; gap: 6px; background: var(--bg-paper-light); border: 1px solid var(--border-sepia); padding: 8px 10px; cursor: pointer; font-size: 0.92rem;">
+              <input type="radio" name="feedback_type_choice" value="Відгук" checked style="cursor: pointer;">
+              <span>⭐ Відгук</span>
+            </label>
+            <label style="flex: 1; display: flex; align-items: center; gap: 6px; background: var(--bg-paper-light); border: 1px solid var(--border-sepia); padding: 8px 10px; cursor: pointer; font-size: 0.92rem;">
+              <input type="radio" name="feedback_type_choice" value="Пропозиція" style="cursor: pointer;">
+              <span>💡 Пропозиція</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Guest Name -->
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label for="feedback-guest" style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 4px; font-size: 0.9rem;">Ваше ім'я (за бажанням):</label>
+          <input type="text" id="feedback-guest" name="guest_name" class="form-control" placeholder="Ім'я або Анонімно" style="width: 100%; padding: 7px 10px; font-family: var(--font-body); border: 1px solid var(--border-sepia); background: var(--bg-paper-light);">
+        </div>
+
+        <!-- Rating Selection (stars) -->
+        <div id="feedback-rating-wrap" class="form-group" style="margin-bottom: 14px;">
+          <label style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 4px; font-size: 0.9rem;">Оцінка:</label>
+          <div style="display: flex; gap: 12px; align-items: center; background: var(--bg-paper-light); border: 1px solid var(--border-sepia); padding: 8px 12px; font-size: 0.9rem;">
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 3px;"><input type="radio" name="feedback_rating_val" value="5" checked> ⭐ 5</label>
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 3px;"><input type="radio" name="feedback_rating_val" value="4"> ⭐ 4</label>
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 3px;"><input type="radio" name="feedback_rating_val" value="3"> ⭐ 3</label>
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 3px;"><input type="radio" name="feedback_rating_val" value="2"> ⭐ 2</label>
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 3px;"><input type="radio" name="feedback_rating_val" value="1"> ⭐ 1</label>
+          </div>
+        </div>
+
+        <!-- Message -->
+        <div class="form-group" style="margin-bottom: 18px;">
+          <label for="feedback-msg" style="display: block; font-family: var(--font-headline); font-weight: bold; margin-bottom: 4px; font-size: 0.9rem;">Ваше повідомлення *:</label>
+          <textarea id="feedback-msg" name="message" class="form-control" rows="4" placeholder="Поділіться вашими враженнями або ідеями для нашого бару..." required style="width: 100%; padding: 8px 10px; font-family: var(--font-body); border: 1px solid var(--border-sepia); background: var(--bg-paper-light);"></textarea>
+        </div>
+
+        <!-- Modal Actions -->
+        <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-sepia); padding-top: 14px;">
+          <button type="button" class="btn-antique" id="btn-cancel-feedback" onclick="closeFeedbackModal()" style="background: transparent;">Скасувати</button>
+          <button type="submit" class="btn-antique" id="btn-submit-feedback" style="padding: 8px 16px; font-weight: bold;">Надіслати</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
   <script>
-    // Failsafe direct handlers so the order modal opens even before or without external scripts
+    // Failsafe direct handlers so the order & feedback modals open even before or without external scripts
     function openOrderModal(drinkName, volume) {
       var modal = document.getElementById('orderModal');
       var nameInput = document.getElementById('order-drink-name');
@@ -195,11 +263,29 @@
       var modal = document.getElementById('orderModal');
       if (modal) modal.style.display = 'none';
     }
+
+    function openFeedbackModal() {
+      var modal = document.getElementById('feedbackModal');
+      if (modal) {
+        modal.style.display = 'flex';
+      }
+    }
+    function closeFeedbackModal() {
+      var modal = document.getElementById('feedbackModal');
+      if (modal) {
+        modal.style.display = 'none';
+      }
+    }
+
     // Close when clicking outside of modal card
     window.addEventListener('click', function(e) {
-      var modal = document.getElementById('orderModal');
-      if (e.target === modal) {
+      var oModal = document.getElementById('orderModal');
+      if (e.target === oModal) {
         closeOrderModal();
+      }
+      var fModal = document.getElementById('feedbackModal');
+      if (e.target === fModal) {
+        closeFeedbackModal();
       }
     });
   </script>

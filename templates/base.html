@@ -31,8 +31,13 @@
     </main>
 
     <!-- Minimal Footer -->
-    <footer style="margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border-sepia); display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink-muted);">
-      <div>© Бар</div>
+    <footer style="margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border-sepia); display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink-muted); flex-wrap: wrap; gap: 10px;">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <span>© Бар</span>
+        <button type="button" onclick="if(window.openFeedbackModal) openFeedbackModal();" style="background: none; border: none; text-decoration: underline; cursor: pointer; color: var(--ink-dark); font-family: var(--font-body); font-size: 0.85rem; padding: 0;">
+          ✍️ Відгуки та пропозиції
+        </button>
+      </div>
       <div>
         {% if is_local %}
           {% if is_admin %}
