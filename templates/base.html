@@ -7,7 +7,7 @@
   <meta name="description" content="Меню бару. Коктейлі, міцні напої та лікери.">
   
   <!-- Favicon -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20y=%220%22%20width=%22100%22%20height=%22100%22><text y=%22.9em%22 font-size=%2290%22>🍸</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232d2926' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M8 22h8'/><path d='M12 15v7'/><path d='M20 3H4l8 12 8-12z'/></svg>">
   
   <!-- CSS Stylesheet -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/newspaper.css') }}?v={{ cache_bust }}">
@@ -34,17 +34,24 @@
     <footer style="margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border-sepia); display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink-muted); flex-wrap: wrap; gap: 10px;">
       <div style="display: flex; align-items: center; gap: 16px;">
         <span>© Бар</span>
-        <button type="button" onclick="if(window.openFeedbackModal) openFeedbackModal();" style="background: none; border: none; text-decoration: underline; cursor: pointer; color: var(--ink-dark); font-family: var(--font-body); font-size: 0.85rem; padding: 0;">
-          ✍️ Відгуки та пропозиції
+        <button type="button" onclick="if(window.openFeedbackModal) openFeedbackModal();" style="background: none; border: none; text-decoration: underline; cursor: pointer; color: var(--ink-dark); font-family: var(--font-body); font-size: 0.85rem; padding: 0; display: inline-flex; align-items: center; gap: 5px;">
+          <svg class="svg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+          Відгуки та пропозиції
         </button>
       </div>
       <div>
         {% if is_local %}
           {% if is_admin %}
-            <a href="{{ url_for('admin_dashboard') }}" class="admin-link">⚙ Адмінка</a> | 
+            <a href="{{ url_for('admin_dashboard') }}" class="admin-link" style="display: inline-flex; align-items: center; gap: 4px;">
+              <svg class="svg-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+              Адмінка
+            </a> | 
             <a href="{{ url_for('admin_logout') }}" class="admin-link">Вийти</a>
           {% else %}
-            <a href="{{ url_for('admin_login') }}" class="admin-link">🔒 Адмінка</a>
+            <a href="{{ url_for('admin_login') }}" class="admin-link" style="display: inline-flex; align-items: center; gap: 4px;">
+              <svg class="svg-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              Адмінка
+            </a>
           {% endif %}
         {% endif %}
       </div>

@@ -83,13 +83,13 @@ document.addEventListener('DOMContentLoaded', function () {
       promoStatus.style.backgroundColor = '#e8f5e9';
       promoStatus.style.border = '1px solid #4caf50';
       promoStatus.style.color = '#1b5e20';
-      promoStatus.innerHTML = '🎉 Промокод <b>РОДИНА</b> активовано! Знижка <b>-100%</b> (За рахунок закладу) 🎁';
+      promoStatus.innerHTML = '<svg class="svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg> Промокод <b>РОДИНА</b> активовано! Знижка <b>-100%</b> (За рахунок закладу)';
     } else if (code.length > 0) {
       promoStatus.style.display = 'block';
       promoStatus.style.backgroundColor = '#ffebee';
       promoStatus.style.border = '1px solid #ef5350';
       promoStatus.style.color = '#c62828';
-      promoStatus.textContent = '❌ Невірний або недійсний промокод';
+      promoStatus.textContent = 'Невірний або недійсний промокод';
     } else {
       promoStatus.style.display = 'none';
       promoStatus.innerHTML = '';

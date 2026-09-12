@@ -25,6 +25,18 @@
   --font-mono: 'Courier New', Courier, monospace;
 }
 
+/* SVG icon utilities */
+.svg-icon {
+  display: inline-block;
+  vertical-align: -0.15em;
+  stroke: currentColor;
+  flex-shrink: 0;
+}
+.svg-star-gold {
+  color: #c4973b;
+  fill: #c4973b;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
